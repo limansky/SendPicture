@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="make_photo">Сделать снимок</string>
+    <string name="load_image">Выбрать изображение</string>
+    <string name="send">Послать!</string>
+    <string name="image_to_send">Изображение для отправки</string>
+    <string name="settings">Настройки</string>
+    <string name="send_by_mail">Послать по почте</string>
+</resources>
