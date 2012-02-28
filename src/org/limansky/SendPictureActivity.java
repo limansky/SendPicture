@@ -7,11 +7,14 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.Button;
 import android.widget.Gallery;
 
@@ -35,6 +38,7 @@ public class SendPictureActivity extends Activity {
 
         final Gallery g = (Gallery)findViewById(R.id.imageGallery);
         g.setAdapter(images);
+        registerForContextMenu(g);
 
         final Button shotBtn = (Button)findViewById(R.id.makePhotoButton);
         shotBtn.setOnClickListener(new OnClickListener() {
@@ -149,5 +153,25 @@ public class SendPictureActivity extends Activity {
     	i.setType("text/plain");
     	i.putParcelableArrayListExtra(Intent.EXTRA_STREAM, images.getUris());
     	startActivity(i);
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v,
+    		ContextMenuInfo menuInfo) {
+    	//menu.add(R.string.delete);
+    	super.onCreateContextMenu(menu, v, menuInfo);
+    	MenuInflater inflater = getMenuInflater();
+    	inflater.inflate(R.menu.gallery_context_menu, menu);
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+    	if (item.getItemId() == R.id.delete) {
+    		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+    		images.removeItem((int)info.id);
+    		return true;
+    	} else {
+    		return super.onContextItemSelected(item);
+    	}
     }
 }

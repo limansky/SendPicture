@@ -12,5 +12,6 @@
     <string name="password">Password</string>
     <string name="accout_settings">Account settings</string>
     <string name="login_desc">Use email address</string>
+    <string name="delete">Delete</string>
 
 </resources>
