@@ -9,18 +9,19 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.Gallery;
 
 public class SendPictureActivity extends Activity {
 
 	private final int IMAGE_CAPTURE_REQUEST_CODE = 100;
 	private final int IMAGE_PICK_REQUEST_CODE = 101;
-	private final String CURRENT_URI = "CurrentUri";
 	private final String LOG_NAME = "SendPicture";
 
-	private Uri currentUri;
+	private ImageAdapter images;
 
 	/** Called when the activity is first created. */
     @Override
@@ -28,20 +29,12 @@ public class SendPictureActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        final String uriStr = null == savedInstanceState ? null : savedInstanceState.getString(CURRENT_URI);
+        images = (ImageAdapter)getLastNonConfigurationInstance();
 
-        if (null != uriStr) {
-        	Log.d(LOG_NAME, uriStr);
+        if (null == images) images = new ImageAdapter(this);
 
-        	currentUri = Uri.parse(uriStr);
-
-//	        final ImageView iv = (ImageView) findViewById(R.id.imageViewer);
-//	        iv.setImageURI(currentUri);
-
-        } else {
-        	Log.d(LOG_NAME, "uriStr is null");
-        }
-
+        final Gallery g = (Gallery)findViewById(R.id.imageGallery);
+        g.setAdapter(images);
 
         final Button shotBtn = (Button)findViewById(R.id.makePhotoButton);
         shotBtn.setOnClickListener(new OnClickListener() {
@@ -97,18 +90,12 @@ public class SendPictureActivity extends Activity {
 
     private void setImageFile(Uri uri) {
     	Log.d(LOG_NAME, "setImageFile: " + uri.toString());
-    	//Gallery gal = (Gallery) findViewById(R.id.imageGallery);
-    	//iv.setImageURI(uri);
-    	//gal.add
-    	currentUri = uri;
+    	images.addItem(uri);
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
-    	if (null != currentUri) {
-    		outState.putString(CURRENT_URI, currentUri.toString());
-    	}
-    	super.onSaveInstanceState(outState);
+    public Object onRetainNonConfigurationInstance() {
+    	return images;
     }
 
     @Override
@@ -122,5 +109,25 @@ public class SendPictureActivity extends Activity {
     		onImagePicked(resultCode, data);
     		break;
     	}
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+    	switch (item.getItemId()) {
+    	case R.id.options_menu:
+    		editOptions();
+    		return true;
+
+    	default:
+    		return super.onOptionsItemSelected(item);
+    	}
+    }
+
+    private void editOptions() {
+    	Log.d(LOG_NAME, "before create");
+    	Intent i = new Intent(this, SettingsActivity.class);
+    	Log.d(LOG_NAME, "before start act");
+    	startActivity(i);
     }
 }
