@@ -6,4 +6,9 @@
     <string name="image_to_send">Изображение для отправки</string>
     <string name="settings">Настройки</string>
     <string name="send_by_mail">Послать по почте</string>
+    <string name="login">Имя пользователя</string>
+    <string name="password">Пароль</string>
+    <string name="accout_settings">Настройки аккаунта</string>
+    <string name="login_desc">Используйте e-mail</string>
+    <string name="delete">Удалить</string>
 </resources>
