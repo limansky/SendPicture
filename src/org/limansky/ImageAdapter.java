@@ -48,4 +48,8 @@ public class ImageAdapter extends BaseAdapter {
 		images.remove(index);
 		notifyDataSetChanged();
 	}
+
+	public ArrayList<Uri> getUris() {
+		return new ArrayList<Uri>(images);
+	}
 }

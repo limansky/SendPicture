@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
     <item android:id="@+id/options_menu" android:title="@string/settings" />
-    <item android:id="@+id/send_by_mail_menu" android:title="@string/send_by_mail" />
+    <item android:id="@+id/send_by_mail_menu" android:title="@string/send_by_mail" android:enabled="false"/>
 </menu>

@@ -60,6 +60,15 @@ public class SendPictureActivity extends Activity {
     	return true;
     }
 
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+
+    	final MenuItem sbm = menu.findItem(R.id.send_by_mail_menu);
+    	sbm.setEnabled(!images.isEmpty());
+
+    	return super.onPrepareOptionsMenu(menu);
+    }
+
     private void takePhoto() {
     	Intent i = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
     	startActivityForResult(i, IMAGE_CAPTURE_REQUEST_CODE);
@@ -119,6 +128,10 @@ public class SendPictureActivity extends Activity {
     		editOptions();
     		return true;
 
+    	case R.id.send_by_mail_menu:
+    		sendByMail();
+    		return true;
+
     	default:
     		return super.onOptionsItemSelected(item);
     	}
@@ -128,6 +141,13 @@ public class SendPictureActivity extends Activity {
     	Log.d(LOG_NAME, "before create");
     	Intent i = new Intent(this, SettingsActivity.class);
     	Log.d(LOG_NAME, "before start act");
+    	startActivity(i);
+    }
+
+    private void sendByMail() {
+    	Intent i = new Intent(Intent.ACTION_SEND_MULTIPLE);
+    	i.setType("text/plain");
+    	i.putParcelableArrayListExtra(Intent.EXTRA_STREAM, images.getUris());
     	startActivity(i);
     }
 }
