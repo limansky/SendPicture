@@ -1,5 +1,15 @@
 package org.limansky;
 
+import java.io.IOException;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.BufferedHttpEntity;
+import org.apache.http.entity.InputStreamEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
@@ -27,151 +37,196 @@ public class SendPictureActivity extends Activity {
 	private ImageAdapter images;
 
 	/** Called when the activity is first created. */
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.main);
 
-        images = (ImageAdapter)getLastNonConfigurationInstance();
+		images = (ImageAdapter)getLastNonConfigurationInstance();
 
-        if (null == images) images = new ImageAdapter(this);
+		if (null == images) images = new ImageAdapter(this);
 
-        final Gallery g = (Gallery)findViewById(R.id.imageGallery);
-        g.setAdapter(images);
-        registerForContextMenu(g);
+		final Gallery g = (Gallery)findViewById(R.id.imageGallery);
+		g.setAdapter(images);
+		registerForContextMenu(g);
 
-        final Button shotBtn = (Button)findViewById(R.id.makePhotoButton);
-        shotBtn.setOnClickListener(new OnClickListener() {
+		final Button shotBtn = (Button)findViewById(R.id.makePhotoButton);
+		shotBtn.setOnClickListener(new OnClickListener() {
 
 			public void onClick(View v) {
 				takePhoto();
 			}
 		});
 
-        final Button loadBtn = (Button) findViewById(R.id.loadImageButton);
-        loadBtn.setOnClickListener(new OnClickListener() {
+		final Button loadBtn = (Button) findViewById(R.id.loadImageButton);
+		loadBtn.setOnClickListener(new OnClickListener() {
 
 			public void onClick(View v) {
 				loadImage();
 			}
 		});
-    }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-    	MenuInflater m = getMenuInflater();
-    	m.inflate(R.menu.mainmenu, menu);
-    	return true;
-    }
+		final Button sendBtn = (Button)findViewById(R.id.sendButton);
+		sendBtn.setOnClickListener(new OnClickListener() {
 
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
+			public void onClick(View arg0) {
+				sendProtocol();
+			}
+		});
+	}
 
-    	final MenuItem sbm = menu.findItem(R.id.send_by_mail_menu);
-    	sbm.setEnabled(!images.isEmpty());
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater m = getMenuInflater();
+		m.inflate(R.menu.mainmenu, menu);
+		return true;
+	}
 
-    	return super.onPrepareOptionsMenu(menu);
-    }
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
 
-    private void takePhoto() {
-    	Intent i = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-    	startActivityForResult(i, IMAGE_CAPTURE_REQUEST_CODE);
-    }
+		final MenuItem sbm = menu.findItem(R.id.send_by_mail_menu);
+		sbm.setEnabled(!images.isEmpty());
 
-    private void loadImage() {
-    	Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-    	startActivityForResult(i, IMAGE_PICK_REQUEST_CODE);
-    }
+		return super.onPrepareOptionsMenu(menu);
+	}
 
-    private void onImageCaptured(int resultCode, Intent data) {
-    	if (RESULT_OK == resultCode) {
-    		setImageFile(data.getData());
+	private void takePhoto() {
+		Intent i = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+		startActivityForResult(i, IMAGE_CAPTURE_REQUEST_CODE);
+	}
 
-    	} else if (RESULT_CANCELED != resultCode) {
-    		AlertDialog.Builder b = new AlertDialog.Builder(this);
-    		b.setMessage("Failed to get image.");
+	private void loadImage() {
+		Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+		startActivityForResult(i, IMAGE_PICK_REQUEST_CODE);
+	}
 
-    		b.create().show();
-    	}
-    }
+	private void onImageCaptured(int resultCode, Intent data) {
+		if (RESULT_OK == resultCode) {
+			setImageFile(data.getData());
 
-    private void onImagePicked(int resultCode, Intent data) {
-    	if (RESULT_OK == resultCode) {
-    		setImageFile(data.getData());
-    	}
-    }
+		} else if (RESULT_CANCELED != resultCode) {
+			AlertDialog.Builder b = new AlertDialog.Builder(this);
+			b.setMessage("Failed to get image.");
 
-    private void setImageFile(Uri uri) {
-    	Log.d(LOG_NAME, "setImageFile: " + uri.toString());
-    	images.addItem(uri);
-    }
+			b.create().show();
+		}
+	}
 
-    @Override
-    public Object onRetainNonConfigurationInstance() {
-    	return images;
-    }
+	private void onImagePicked(int resultCode, Intent data) {
+		if (RESULT_OK == resultCode) {
+			setImageFile(data.getData());
+		}
+	}
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    	switch (requestCode) {
-    	case IMAGE_CAPTURE_REQUEST_CODE:
-    		onImageCaptured(resultCode, data);
-    		break;
+	private void setImageFile(Uri uri) {
+		Log.d(LOG_NAME, "setImageFile: " + uri.toString());
+		images.addItem(uri);
 
-    	case IMAGE_PICK_REQUEST_CODE:
-    		onImagePicked(resultCode, data);
-    		break;
-    	}
-    }
+		final Button sendBtn = (Button) findViewById(R.id.sendButton);
+		sendBtn.setEnabled(true);
+	}
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+	@Override
+	public Object onRetainNonConfigurationInstance() {
+		return images;
+	}
 
-    	switch (item.getItemId()) {
-    	case R.id.options_menu:
-    		editOptions();
-    		return true;
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		switch (requestCode) {
+		case IMAGE_CAPTURE_REQUEST_CODE:
+			onImageCaptured(resultCode, data);
+			break;
 
-    	case R.id.send_by_mail_menu:
-    		sendByMail();
-    		return true;
+		case IMAGE_PICK_REQUEST_CODE:
+			onImagePicked(resultCode, data);
+			break;
+		}
+	}
 
-    	default:
-    		return super.onOptionsItemSelected(item);
-    	}
-    }
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
 
-    private void editOptions() {
-    	Log.d(LOG_NAME, "before create");
-    	Intent i = new Intent(this, SettingsActivity.class);
-    	Log.d(LOG_NAME, "before start act");
-    	startActivity(i);
-    }
+		switch (item.getItemId()) {
+		case R.id.options_menu:
+			editOptions();
+			return true;
 
-    private void sendByMail() {
-    	Intent i = new Intent(Intent.ACTION_SEND_MULTIPLE);
-    	i.setType("text/plain");
-    	i.putParcelableArrayListExtra(Intent.EXTRA_STREAM, images.getUris());
-    	startActivity(i);
-    }
+		case R.id.send_by_mail_menu:
+			sendByMail();
+			return true;
 
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v,
-    		ContextMenuInfo menuInfo) {
-    	//menu.add(R.string.delete);
-    	super.onCreateContextMenu(menu, v, menuInfo);
-    	MenuInflater inflater = getMenuInflater();
-    	inflater.inflate(R.menu.gallery_context_menu, menu);
-    }
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
 
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-    	if (item.getItemId() == R.id.delete) {
-    		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
-    		images.removeItem((int)info.id);
-    		return true;
-    	} else {
-    		return super.onContextItemSelected(item);
-    	}
-    }
+	private void editOptions() {
+		Log.d(LOG_NAME, "before create");
+		Intent i = new Intent(this, SettingsActivity.class);
+		Log.d(LOG_NAME, "before start act");
+		startActivity(i);
+	}
+
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v,
+			ContextMenuInfo menuInfo) {
+		//menu.add(R.string.delete);
+		super.onCreateContextMenu(menu, v, menuInfo);
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.gallery_context_menu, menu);
+	}
+
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		if (item.getItemId() == R.id.delete) {
+			AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+			images.removeItem((int)info.id);
+			return true;
+		} else {
+			return super.onContextItemSelected(item);
+		}
+	}
+
+	private void sendByMail() {
+		Intent i = new Intent(Intent.ACTION_SEND_MULTIPLE);
+		i.setType("text/plain");
+		i.putParcelableArrayListExtra(Intent.EXTRA_STREAM, images.getUris());
+		startActivity(i);
+	}
+
+	private void sendProtocol() {
+
+		final String url = "http://borki67km.ru/67/tst_upload.php";
+
+		HttpClient client = new DefaultHttpClient();
+
+		try {
+
+			for (Uri uri : images.getUris()) {
+
+				HttpPost post = new HttpPost(url);
+
+				post.setHeader("user", "12345");
+				post.setHeader("password", "54321");
+
+				InputStreamEntity e = new InputStreamEntity(getContentResolver().openInputStream(uri), -1);
+				e.setContentType("binary/octet-stream");
+
+				post.setEntity(new BufferedHttpEntity(e));
+
+				HttpResponse r =  client.execute(post);
+
+				Log.d(LOG_NAME, r.toString());
+			}
+
+		} catch (ClientProtocolException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 }
