@@ -41,6 +41,7 @@ public final class R {
         public static final int password=0x7f050008;
         public static final int send=0x7f050003;
         public static final int send_by_mail=0x7f050006;
+        public static final int send_error=0x7f05000c;
         public static final int settings=0x7f050005;
     }
     public static final class xml {

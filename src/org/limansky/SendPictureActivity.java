@@ -1,20 +1,23 @@
 package org.limansky;
 
-import java.io.IOException;
+import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.BufferedHttpEntity;
-import org.apache.http.entity.InputStreamEntity;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -27,6 +30,7 @@ import android.view.View.OnClickListener;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.Button;
 import android.widget.Gallery;
+import android.widget.Toast;
 
 public class SendPictureActivity extends Activity {
 
@@ -202,31 +206,35 @@ public class SendPictureActivity extends Activity {
 
 		HttpClient client = new DefaultHttpClient();
 
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+
+		final String uname = prefs.getString("loginPref", "");
+		final String passwd = prefs.getString("passPref", "");
+
 		try {
+			List<Uri> uris = images.getUris();
 
-			for (Uri uri : images.getUris()) {
+			HttpPost post = new HttpPost(url);
+			MultipartEntity muentity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
 
-				HttpPost post = new HttpPost(url);
+			post.setHeader("user", uname);
+			post.setHeader("password", passwd);
 
-				post.setHeader("user", "12345");
-				post.setHeader("password", "54321");
+			for (int i = 0; i < uris.size(); i++) {
 
-				InputStreamEntity e = new InputStreamEntity(getContentResolver().openInputStream(uri), -1);
-				e.setContentType("binary/octet-stream");
+				final byte [] data = IOUtils.toByteArray(getContentResolver().openInputStream(uris.get(i)));
+				final String type = getContentResolver().getType(uris.get(i));
 
-				post.setEntity(new BufferedHttpEntity(e));
-
-				HttpResponse r =  client.execute(post);
-
-				Log.d(LOG_NAME, r.toString());
+				muentity.addPart("file" + i, new ByteArrayBody(data, type, "file" + i + ".jpg"));
 			}
 
-		} catch (ClientProtocolException e) {
-			// TODO Auto-generated catch block
+			post.setEntity(muentity);
+			HttpResponse r =  client.execute(post);
+			Log.d(LOG_NAME, "HTTP Status=" + r.getStatusLine().getStatusCode());
+
+		} catch (Throwable e) {
 			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Toast.makeText(getBaseContext(), R.string.send_error, Toast.LENGTH_LONG);
 		}
 	}
 }
