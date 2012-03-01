@@ -14,5 +14,8 @@
     <string name="login_desc">Use email address</string>
     <string name="delete">Delete</string>
     <string name="send_error">Sending failed!</string>
+    <string name="server_settings">Server parameters</string>
+    <string name="hostname">URI</string>
+    <string name="hostname_desc">Link to the server to upload data</string>
 
 </resources>

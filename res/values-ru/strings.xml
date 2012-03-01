@@ -12,4 +12,7 @@
     <string name="login_desc">Используйте e-mail</string>
     <string name="delete">Удалить</string>
     <string name="send_error">Ошибка отправки!</string>
+    <string name="server_settings">Настройки сервера</string>
+    <string name="hostname">URI</string>
+    <string name="hostname_desc">Ссылка для загрузки данных</string>
 </resources>

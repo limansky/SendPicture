@@ -3,15 +3,22 @@
     
     <PreferenceCategory android:title="@string/accout_settings">
         <EditTextPreference android:title="@string/login" 
-            			    android:name="Login" 
-            			    android:key="loginPref"
-            			    android:inputType="textEmailAddress" 
-            			    android:summary="@string/login_desc"/>
+                            android:name="Login" 
+                            android:key="loginPref"
+                            android:inputType="textEmailAddress" 
+                            android:summary="@string/login_desc"/>
         
         <EditTextPreference android:name="Password" 
-            				android:title="@string/password" 
-            				android:key="passPref" 
-            				android:password="true" />
+                            android:title="@string/password" 
+                            android:key="passPref" 
+                            android:password="true" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/server_settings">
+        <EditTextPreference android:name="hostname"
+                            android:title="@string/hostname"
+                            android:summary="@string/hostname_desc"
+                            android:key="hostnamePref"
+                            android:defaultValue="http://borki67km.ru/67/tst_upload.php"/>
     </PreferenceCategory>
     
 </PreferenceScreen>

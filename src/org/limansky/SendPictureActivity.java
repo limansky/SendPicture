@@ -200,16 +200,14 @@ public class SendPictureActivity extends Activity {
 		startActivity(i);
 	}
 
-	private void sendProtocol() {
-
-		final String url = "http://borki67km.ru/67/tst_upload.php";
-
-		HttpClient client = new DefaultHttpClient();
-
+	private void sendProtocol() {;
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 
+		final String url = prefs.getString("hostnamePref", "http://borki67km.ru/67/tst_upload.php");
 		final String uname = prefs.getString("loginPref", "");
 		final String passwd = prefs.getString("passPref", "");
+
+		HttpClient client = new DefaultHttpClient();
 
 		try {
 			List<Uri> uris = images.getUris();
